@@ -2,6 +2,7 @@ import os
 
 from celery.schedules import crontab
 from django.utils.translation import gettext_lazy as _
+from corsheaders.defaults import default_methods
 
 DEBUG = False
 
@@ -290,12 +291,14 @@ INSTALLED_APPS = [
     "drf_yasg",
     "allauth.socialaccount.providers.saml",
     "saml_auth.apps.SamlAuthConfig",
+    "corsheaders",
 ]
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.locale.LocaleMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -555,3 +558,21 @@ except ImportError:
 if GLOBAL_LOGIN_REQUIRED:
     auth_index = MIDDLEWARE.index("django.contrib.auth.middleware.AuthenticationMiddleware")
     MIDDLEWARE.insert(auth_index + 1, "django.contrib.auth.middleware.LoginRequiredMiddleware")
+
+CORS_ALLOWED_ORIGINS = ["http://localhost:8088","https://financial.xiaoyequ9.com"]
+CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_METHODS = default_methods
+
+CSRF_COOKIE_DOMAIN = None
+CSRF_COOKIE_PATH = '/'
+CSRF_COOKIE_SECURE = False
+SESSION_COOKIE_SECURE = False
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:8088",
+    "https://financial.xiaoyequ9.com"
+]
+from corsheaders.defaults import default_headers
+
+CORS_ALLOW_HEADERS = list(default_headers) + [
+    "cache-control",
+]
