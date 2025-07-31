@@ -2,6 +2,7 @@ import os
 
 from celery.schedules import crontab
 from django.utils.translation import gettext_lazy as _
+from corsheaders.defaults import default_methods
 
 DEBUG = False
 
@@ -229,7 +230,12 @@ POST_UPLOAD_AUTHOR_MESSAGE_UNLISTED_NO_COMMENTARY = ""
 CANNOT_ADD_MEDIA_MESSAGE = ""
 
 # mp4hls command, part of Bento4
-MP4HLS_COMMAND = "/home/mediacms.io/mediacms/Bento4-SDK-1-6-0-637.x86_64-unknown-linux/bin/mp4hls"
+import platform
+system = platform.system()
+if system == "Darwin":
+    MP4HLS_COMMAND = "/opt/homebrew/bin/mp4hls"
+else:
+    MP4HLS_COMMAND = "/home/mediacms.io/mediacms/Bento4-SDK-1-6-0-637.x86_64-unknown-linux/bin/mp4hls"
 
 # highly experimental, related with remote workers
 ADMIN_TOKEN = ""
@@ -285,12 +291,14 @@ INSTALLED_APPS = [
     "drf_yasg",
     "allauth.socialaccount.providers.saml",
     "saml_auth.apps.SamlAuthConfig",
+    "corsheaders",
 ]
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.locale.LocaleMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -376,7 +384,15 @@ LOGGING = {
     },
 }
 
-DATABASES = {"default": {"ENGINE": "django.db.backends.postgresql", "NAME": "mediacms", "HOST": "127.0.0.1", "PORT": "5432", "USER": "mediacms", "PASSWORD": "mediacms", "OPTIONS": {'pool': True}}}
+DATABASES = {"default": {
+    "ENGINE": "django.db.backends.postgresql",
+    "NAME": "mediacms",
+    "HOST": "postgresql",
+    "PORT": "5433",
+    "USER": "mediacms",
+    "PASSWORD": "mediacms",
+    "OPTIONS": {'pool': True}}
+}
 
 
 REDIS_LOCATION = "redis://127.0.0.1:6379/1"
@@ -542,3 +558,21 @@ except ImportError:
 if GLOBAL_LOGIN_REQUIRED:
     auth_index = MIDDLEWARE.index("django.contrib.auth.middleware.AuthenticationMiddleware")
     MIDDLEWARE.insert(auth_index + 1, "django.contrib.auth.middleware.LoginRequiredMiddleware")
+
+CORS_ALLOWED_ORIGINS = ["http://localhost:8088","https://financial.xiaoyequ9.com"]
+CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_METHODS = default_methods
+
+CSRF_COOKIE_DOMAIN = None
+CSRF_COOKIE_PATH = '/'
+CSRF_COOKIE_SECURE = False
+SESSION_COOKIE_SECURE = False
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:8088",
+    "https://financial.xiaoyequ9.com"
+]
+from corsheaders.defaults import default_headers
+
+CORS_ALLOW_HEADERS = list(default_headers) + [
+    "cache-control",
+]
